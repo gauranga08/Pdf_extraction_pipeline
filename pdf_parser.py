@@ -37,7 +37,7 @@ def process_pdf(pdf_path, yaml_data):
     image_save_directory = Path(os.path.expanduser(yaml_data["path_to_directory"]))
     image_save_directory.mkdir(parents=True, exist_ok=True)
 
-    logging.info("Extracting images from PDF...")
+    logging.info("Extracting images from PDF (Might take some time as high resolution images are extracted for quality purpose)...")
     saved_images = pdf_to_images(pdf_path, str(image_save_directory), zoom=10, image_format='png')
 
     if not saved_images:
