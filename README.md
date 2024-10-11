@@ -16,6 +16,7 @@ This project creates a pipeline that utilizes LLMs from the Groq API to extract 
 1. **Create a Groq API Key**: 
    - Sign up for an account on the Groq website.
    - Generate your free API key from your Groq account dashboard (https://console.groq.com/keys).
+2. **Install Tesseract OCR**: Setup in your machine
 
 ## Requirements
 
