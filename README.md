@@ -66,6 +66,7 @@ The pipeline generates the following for the given PDF:
    Run python main.py
 9. Monitor the logs.log file to keep track of the processing status.
 10. Upon completion, the generated JSON files will be located in the output folder
+11. For any directory related issue refer to config.yaml file
 
 
 
