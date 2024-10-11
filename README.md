@@ -81,7 +81,7 @@ The current implementation can be enhanced in several ways:
 
 - **Cloud Storage**: Using cloud services like AWS S3 to store images and JSON files will provide additional robustness and scalability, enabling easy access and management of large datasets.
 
-- **Data Security**: If processing data in a secured environment is a priority, consider utilizing Azure OpenAI services. This can enhance data security by leveraging cloud-based infrastructure and advanced AI capabilities. Example use of Azure OpenAI models
+- **Data Security**: If processing data in a secured environment is a priority, consider utilizing Azure OpenAI services. This can enhance data security by leveraging cloud-based infrastructure and advanced AI capabilities.
 
 
 
