@@ -9,6 +9,27 @@ This project creates a pipeline that utilizes LLMs from the Groq API to extract 
 - **OCR Technology**: The pipeline uses [PyTesseract](https://pypi.org/project/pytesseract/) for Optical Character Recognition (OCR) to extract text from images.
 - **LLM Model**: The project employs the `llama-3.1-70b-versatile` model from the Groq API(https://groq.com/), which is known for its speed and efficiency in inference tasks. Groq utilizes a specialized architecture called **Language Processing Unit (LPU)**, designed specifically for Natural Language Processing (NLP) tasks, which significantly enhances performance compared to traditional CPU or GPU processing.
 
+## Design
+
+### Process Flow
+1. **PDF Loading**: The PDF document is loaded using the PyMuPDF library.
+2. **Image Extraction**: Each page of the PDF is converted into images using the `get_pixmap` method.
+3. **Text Extraction**: For each image, the `image_to_string` function uses Tesseract OCR to extract text.
+4. **LLM Processing**: The extracted text is sent to a single LLM call where:
+   - A concise summary of the page content is generated.
+   - Flashcards in the form of question and answer pairs are created.
+   - A search query is formulated based on the text.
+5. **Web Scraping**: The generated search query is passed to a function that uses Beautiful Soup to scrape relevant URLs from the web.
+6. **Data Compilation**: All results (summary, flashcards, search query, and URLs) are compiled into seperate structured JSON format.
+
+### JSON Output Structure
+The final output will be structured in a JSON format that includes:
+- **Page Number**
+- **Summary**
+- **Flashcards** (as question-answer pairs)
+- **Search Query**
+- **Related URLs**
+
 ## Setup Instructions
 
 ### Prerequisites
