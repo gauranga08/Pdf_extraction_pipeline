@@ -22,7 +22,7 @@ This project creates a pipeline that utilizes LLMs from the Groq API to extract 
 
 ### Input
 
-- A PDF document.
+- A PDF(CVS) document in 'inputs/pdfs' folder.
 
 ### Output
 
