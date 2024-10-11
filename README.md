@@ -21,6 +21,18 @@ This project creates a pipeline that utilizes LLMs from the Groq API to extract 
    - A search query is formulated based on the text.
 5. **Web Scraping**: The generated search query is passed to a function that uses Beautiful Soup to scrape relevant URLs from the web.
 6. **Data Compilation**: All results (summary, flashcards, search query, and URLs) are compiled into seperate structured JSON format.
+## Prompt Engineering Strategies
+In this project, I employed various prompt engineering strategies to optimize interactions with the language model (LLM), enhance clarity, and address prompt injection risks. Key strategies include:
+
+- **Clarity and Specificity**: Used straightforward language and tailored prompts to clearly specify tasks, avoiding ambiguity.
+- **One-Shot Prompting**: Used one-shot prompting for clarity, demonstrating expected outputs with single examples while ensuring robustness against manipulation.
+- **Robust with Prompt injection** 
+- **Contextual Alignment**: Provided necessary background information and aligned prompts with user intent to ensure relevance.
+- **Structured and Dynamic Format**: Employed structured templates with dynamic placeholders for variables to guide the model towards the desired output format.
+- **Validation and Conciseness**: Sanitized inputs for security and kept prompts concise yet informative.
+- **Task-Specific Language**: Utilized relevant terminology and phrasing tailored to specific tasks.
+- **Testing and Iteration**: Regularly tested and refined prompts based on response quality.
+
 
 ### JSON Output Structure
 The final output will be structured in a JSON format that includes:
