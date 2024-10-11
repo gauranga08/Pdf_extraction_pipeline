@@ -68,4 +68,23 @@ The pipeline generates the following for the given PDF:
 
 
 
+## Scope for Improvement
+
+The current implementation can be enhanced in several ways:
+
+- **Parallel Processing**: The image processing and LLM processing can be performed using parallel processing or multiprocessing techniques. This approach will significantly increase the processing speed, allowing multiple pages to be processed simultaneously.
+
+
+- **User Interface**: Consider adding a user-friendly interface for easier interaction with the pipeline.
+
+- **Testing**: Implement unit tests and integration tests to ensure the reliability and maintainability of the codebase.
+
+- **Cloud Storage**: Using cloud services like AWS S3 to store images and JSON files will provide additional robustness and scalability, enabling easy access and management of large datasets.
+
+- **Data Security**: If processing data in a secured environment is a priority, consider utilizing Azure OpenAI services. This can enhance data security by leveraging cloud-based infrastructure and advanced AI capabilities. Example use of Azure OpenAI models
+
+
+
+
+
 
