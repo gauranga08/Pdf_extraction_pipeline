@@ -49,8 +49,8 @@ The pipeline generates the following for the given PDF:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/gauranga08/Pdf_parsing_pipeline.git
-   cd pdf-parsing-pipeline
+   git clone https://github.com/gauranga08/Pdf_extraction_pipeline.git
+   cd 
 
 2. Create a Virtual Environment:
 3. ```bash
