@@ -108,6 +108,7 @@ The pipeline generates the following for the given PDF:
 The current implementation can be enhanced in several ways:
 
 - **Parallel Processing**: The image extraction and LLM processing tasks can be parallelized using multi-processing techniques. By processing multiple pages simultaneously in batches, the pipeline's speed and efficiency will be significantly improved, especially for larger documents.
+- **Fine-tuning**: Because these models used are foundational LLMs, they can be fine-tuned on specific to the subject to be more accurate and efficient.
 - **Improved Image URL Quality**: Currently, the pipeline uses BeautifulSoup to scrape image URLs. Implementing a more specialized Google Image API or a similar service will yield higher-quality image results and more relevant content, improving the accuracy and relevance of image URL suggestions.
 - **User Interface**: Consider adding a user-friendly interface for easier interaction with the pipeline.
 
