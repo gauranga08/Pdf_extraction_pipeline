@@ -8,6 +8,7 @@ This project creates a pipeline that utilizes LLMs from the Groq API to extract 
 
 - **OCR Technology**: The pipeline uses [PyTesseract](https://pypi.org/project/pytesseract/) for Optical Character Recognition (OCR) to extract text from images.
 - **LLM Model**: The project employs the `llama-3.1-70b-versatile` model from the Groq API(https://groq.com/), which is known for its speed and efficiency in inference tasks. Groq utilizes a specialized architecture called **Language Processing Unit (LPU)**, designed specifically for Natural Language Processing (NLP) tasks, which significantly enhances performance compared to traditional CPU or GPU processing.
+- **Performance Improvement**: The pipeline has significantly improved its processing time since its first version from 1 hour and 29 minutes to just 15 minute for 110 pages of pdf by leveraging concurrent processing. 
 
 ## Design
 
