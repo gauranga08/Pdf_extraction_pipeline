@@ -8,19 +8,42 @@ import json
 import re
 from llm_processor import process_with_llm
 import shutil
+from concurrent.futures import ProcessPoolExecutor
 
+
+def process_single_page(page_number, pdf_path, output_folder, zoom=10, image_format='png'):
+    """Helper function to process a single PDF page."""
+    try:
+        pdf_document = fitz.open(pdf_path)
+        page = pdf_document.load_page(page_number)
+        pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), alpha=False)
+        output_image_path = os.path.join(output_folder, f"page_{page_number + 1}.{image_format}")
+        pix.save(output_image_path)
+        logging.info(f"Extracted image to {(output_image_path)}.")
+        return output_image_path
+    except Exception as e:
+        logging.error(f"Error extracting page {page_number + 1}: {e}")
+        return None
 
 def pdf_to_images(pdf_path, output_folder, zoom=10, image_format='png'):
     os.makedirs(output_folder, exist_ok=True)
     image_paths = []
+    
     try:
         pdf_document = fitz.open(pdf_path)
-        for page_number in range(len(pdf_document)):  # Limiting to first 3 pages; change as needed
-            page = pdf_document.load_page(page_number)
-            pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), alpha=False)
-            output_image_path = os.path.join(output_folder, f"page_{page_number + 1}.{image_format}")
-            pix.save(output_image_path)
-            image_paths.append(output_image_path)
+        total_pages = len(pdf_document)
+        
+        # Use ProcessPoolExecutor for multiprocessing
+        with ProcessPoolExecutor() as executor:
+            futures = [executor.submit(process_single_page, page_num, pdf_path, output_folder, zoom, image_format)
+                       for page_num in range(total_pages)]
+            
+            # Collect the results as they complete
+            for future in futures:
+                result = future.result()
+                if result:
+                    image_paths.append(result)
+        
         logging.info(f"Extracted {len(image_paths)} images from the PDF.")
         return image_paths
     except Exception as e:
@@ -28,23 +51,11 @@ def pdf_to_images(pdf_path, output_folder, zoom=10, image_format='png'):
         return []
 
 
-def process_pdf(pdf_path, yaml_data):
-    output = {"pages": []}
-    summary_list = []
-    flashcard_list = []
-    query_list = []
+from concurrent.futures import ProcessPoolExecutor
+def process_image(image_path, page_number, yaml_data):
+    """Process a single image to extract text, generate prompts, and fetch images."""
+    try:
 
-    image_save_directory = Path(os.path.expanduser(yaml_data["path_to_directory"]))
-    image_save_directory.mkdir(parents=True, exist_ok=True)
-
-    logging.info("Extracting images from PDF (Might take some time as high resolution images are extracted for quality purpose)...")
-    saved_images = pdf_to_images(pdf_path, str(image_save_directory), zoom=10, image_format='png')
-
-    if not saved_images:
-        logging.warning("No images were saved from the PDF.")
-        return
-
-    for page_number, image_path in enumerate(saved_images, start=1):
         logging.info(f"Processing image: {image_path}")
 
         text = image_to_string(image_path, yaml_data["language"])
@@ -52,7 +63,7 @@ def process_pdf(pdf_path, yaml_data):
 
         if not text:
             logging.warning(f"No text found on page {page_number}, skipping.")
-            continue
+            return None  # Skip this page
 
         # Create a prompt for the LLM to generate summary, flashcards, and search query
         prompt = f'''You are a subject matter expert in the subject given in the ({text}) and your task is to extract the following information from the given text in () and provide a response in the given JSON format:
@@ -89,13 +100,21 @@ def process_pdf(pdf_path, yaml_data):
         logging.info("Loaded prompt for LLM.")
 
         llm_response = process_with_llm(prompt)
+        logging.info("Got LLM response")
+
         json_match = re.search(r'(\{.*\})', llm_response, re.DOTALL)
         if not json_match:
             logging.error("No valid JSON found in the LLM response.")
-            continue  # Use continue to process the next page instead of returning
+            return None  # Skip this page
 
         json_str = json_match.group(1)
-        response_json = json.loads(json_str)
+        try:
+            response_json = json.loads(json_str)
+        except json.JSONDecodeError as e:
+            logging.error(f"Failed to parse JSON: {e} from string: {json_str}")
+            return None  # Skip this page
+
+        logging.info("Parsed JSON successfully")
 
         summary = response_json.get("summary")
         flashcards = response_json.get("flashcards")
@@ -103,7 +122,7 @@ def process_pdf(pdf_path, yaml_data):
 
         image_urls = fetch_image_urls(search_query)
 
-        page_result = {
+        return {
             "page_number": page_number,
             "summary": summary,
             "flashcards": flashcards,
@@ -111,45 +130,74 @@ def process_pdf(pdf_path, yaml_data):
             "image_urls": image_urls,
             "image_path": str(image_path)
         }
-        output["pages"].append(page_result)
+    except Exception as e:
+        logging.error(f"An error occurred while processing page {page_number}: {e}")
+        return None  # Skip this page
 
-        summary_list.append({"page_number": page_number, "summary": summary})
-        flashcard_list.append({"page_number": page_number, "flashcards": flashcards})
-        query_list.append({"page_number": page_number, "search_query": search_query, "image_urls": image_urls})
+
+def process_pdf(pdf_path, yaml_data):
+    output = {"pages": []}
+    summary_list = []
+    flashcard_list = []
+    query_list = []
+
+    image_save_directory = Path(os.path.expanduser(yaml_data["path_to_directory"]))
+    image_save_directory.mkdir(parents=True, exist_ok=True)
+
+    logging.info("Extracting images from PDF (Might take some time as high resolution images are extracted for quality purpose)...")
+    saved_images = pdf_to_images(pdf_path, str(image_save_directory), zoom=10, image_format='png')
+
+    if not saved_images:
+        logging.warning("No images were saved from the PDF.")
+        return
+
+    with ProcessPoolExecutor() as executor:
+        futures = {executor.submit(process_image, image_path, page_number, yaml_data): page_number 
+                   for page_number, image_path in enumerate(saved_images, start=1)}
+        for future in futures:
+            result = future.result()
+            if result:
+                output["pages"].append(result)
+                summary_list.append({"page_number": result["page_number"], "summary": result["summary"]})
+                flashcard_list.append({"page_number": result["page_number"], "flashcards": result["flashcards"]})
+                query_list.append({"page_number": result["page_number"], "search_query": result["search_query"], "image_urls": result["image_urls"]})
 
     save_results(output, summary_list, flashcard_list, query_list, yaml_data)
 
 
 def save_results(output, summary_list, flashcard_list, query_list, yaml_data):
-    results_folder = Path(yaml_data["results_folder"])
+    try:
+        results_folder = Path(yaml_data["results_folder"])
 
-    # Delete the existing results folder if it exists
-    if results_folder.exists():
-        shutil.rmtree(results_folder)
+        # Delete the existing results folder if it exists
+        if results_folder.exists():
+            shutil.rmtree(results_folder)
 
-    # Create the output folder
-    results_folder.mkdir(parents=True, exist_ok=True)
+        # Create the output folder
+        results_folder.mkdir(parents=True, exist_ok=True)
 
-    # Create subfolders for summaries, flashcards, and queries
-    summary_folder = Path(yaml_data["summary_folder"])
-    flashcard_folder = Path(yaml_data["flashcard_folder"])
-    query_folder = Path(yaml_data["query_folder"])
+        # Create subfolders for summaries, flashcards, and queries
+        summary_folder = Path(yaml_data["summary_folder"])
+        flashcard_folder = Path(yaml_data["flashcard_folder"])
+        query_folder = Path(yaml_data["query_folder"])
 
-    summary_folder.mkdir(parents=True, exist_ok=True)
-    flashcard_folder.mkdir(parents=True, exist_ok=True)
-    query_folder.mkdir(parents=True, exist_ok=True)
+        summary_folder.mkdir(parents=True, exist_ok=True)
+        flashcard_folder.mkdir(parents=True, exist_ok=True)
+        query_folder.mkdir(parents=True, exist_ok=True)
 
-    # Save results to JSON files
-    with open(results_folder / "output.json", "w") as file:
-        json.dump(output, file, indent=4)
+        # Save results to JSON files
+        with open(results_folder / "output.json", "w") as file:
+            json.dump(output, file, indent=4)
 
-    with open(summary_folder / "summaries.json", "w") as file:
-        json.dump(summary_list, file, indent=4)
+        with open(summary_folder / "summaries.json", "w") as file:
+            json.dump(summary_list, file, indent=4)
 
-    with open(flashcard_folder / "flashcards.json", "w") as file:
-        json.dump(flashcard_list, file, indent=4)
+        with open(flashcard_folder / "flashcards.json", "w") as file:
+            json.dump(flashcard_list, file, indent=4)
 
-    with open(query_folder / "search_queries.json", "w") as file:
-        json.dump(query_list, file, indent=4)
+        with open(query_folder / "search_queries.json", "w") as file:
+            json.dump(query_list, file, indent=4)
 
-    logging.info("Results saved successfully.")
+        logging.info("Results saved successfully.") 
+    except Exception as e:
+        logging.error(f"An error occurred while saving results: {e}")
