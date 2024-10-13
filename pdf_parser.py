@@ -11,6 +11,7 @@ import shutil
 from concurrent.futures import ProcessPoolExecutor
 
 
+
 def process_single_page(page_number, pdf_path, output_folder, zoom=10, image_format='png'):
     """Helper function to process a single PDF page."""
     try:
@@ -51,7 +52,6 @@ def pdf_to_images(pdf_path, output_folder, zoom=10, image_format='png'):
         return []
 
 
-from concurrent.futures import ProcessPoolExecutor
 def process_image(image_path, page_number, yaml_data):
     """Process a single image to extract text, generate prompts, and fetch images."""
     try:
