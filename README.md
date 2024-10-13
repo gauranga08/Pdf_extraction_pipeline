@@ -55,7 +55,7 @@ The final output will be structured in a JSON format that includes:
 
 ### Input
 
-- A PDF(CVS) document in 'inputs/pdfs' folder.
+- A PDF(CVS) document in 'inputs/pdfs' folder (Delete existing dummy file).
 
 ### Output
 
@@ -95,11 +95,12 @@ The pipeline generates the following for the given PDF:
    pip install -r requirements.txt
 6. Set Up the Groq API Key in .env file(recommended practice) or directly paste in llm_processor.py
 7. Ensure the PDF file is placed in the input/pdfs folder of your project.
-8. ```bash
+8.Run
+   ```bash
    Run python main.py
-9. Monitor the logs.log file to keep track of the processing status.
-10. Upon completion, the generated JSON files will be located in the output folder
-11. For any directory related issue refer to config.yaml file
+10. Monitor the logs.log file to keep track of the processing status.
+11. Upon completion, the generated JSON files will be located in the output folder
+12. For any directory related issue refer to config.yaml file
 
 
 
