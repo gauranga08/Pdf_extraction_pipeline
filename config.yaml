@@ -13,7 +13,7 @@ query_folder: "./output/search_queries"  # Folder for search query outputs
 
 use_clipboard_for_input: False  # Set to False to process images from the directory
 
-path_to_directory: "./input/images"  # Dynamic directory for input images, relative to the script's location
+path_to_directory: "./inputs/images"  # Dynamic directory for input images, relative to the script's location
 
 print_result: True  # This will print the result in the console
-pdf_path: "./input/pdfs" 
+pdf_path: "./inputs/pdfs" 
